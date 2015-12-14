@@ -1,0 +1,2 @@
+-I capstone/include
+capstone/include/capstone.h

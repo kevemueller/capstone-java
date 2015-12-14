@@ -1,0 +1,4 @@
+-mode Directory
+-package hu.keve.capstonebinding
+-f
+-beautifyNames
