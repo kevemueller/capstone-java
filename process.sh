@@ -5,7 +5,7 @@
 BRANCHLIST="master next"
 ARCHLIST="default nix32 cross-win32 cross-win64"
 #BRANCHLIST="next"
-#ARCHLIST=""
+#ARCHLIST="default"
 
 git pull --recurse-submodules
 git submodule update --remote capstone
@@ -82,25 +82,29 @@ for BRANCH in $BRANCHLIST; do
 		cp -a gen/$BRANCH/java/lib/ gen/$BRANCH/bin/
 		rm -rf gen/$BRANCH/java/lib/
 		javac -cp lib/bridj-0.7.0.jar gen/$BRANCH/java/hu/keve/capstonebinding/*.java -d gen/$BRANCH/bin
-		find gen/$BRANCH/java -name "*.java" -print0 | xargs -0 javadoc -classpath lib/bridj-0.7.0.jar -link http://nativelibs4java.sourceforge.net/bridj/api/0.7.0 -link http://download.oracle.com/javase/6/docs/api -d gen/$BRANCH/doc > javadoc-capstonebinding-$BRANCH.log
+		if [ $? -eq 0 ]; then
+			find gen/$BRANCH/java -name "*.java" -print0 | xargs -0 javadoc -classpath lib/bridj-0.7.0.jar -link http://nativelibs4java.sourceforge.net/bridj/api/0.7.0 -link http://download.oracle.com/javase/7/docs/api -d gen/$BRANCH/doc > javadoc-capstonebinding-$BRANCH.log
 
-	# TODO: add some license and other stuff
-	# TODO: add an all-inclusive version for the lazy?
+		# TODO: add some license and other stuff
+		# TODO: add an all-inclusive version for the lazy?
 
-		CSBJARNAME=capstonebinding-${API_MAJOR}.${API_MINOR}_git${API_DATE}
-		
-		jar cf $CSBJARNAME-bin.jar -C gen/$BRANCH/bin .
-		jar cf $CSBJARNAME-src.jar -C gen/$BRANCH/java .
-		jar cf $CSBJARNAME-javadoc.jar -C gen/$BRANCH/doc .
+			CSBJARNAME=capstonebinding-${API_MAJOR}.${API_MINOR}_git${API_DATE}
+			
+			jar cf $CSBJARNAME-bin.jar -C gen/$BRANCH/bin .
+			jar cf $CSBJARNAME-src.jar -C gen/$BRANCH/java .
+			jar cf $CSBJARNAME-javadoc.jar -C gen/$BRANCH/doc .
 
-		rm -rf build/csj
-		mkdir -p build/csj/bin
-		javac -cp lib/bridj-0.7.0.jar:$CSBJARNAME-bin.jar capstonej/capstonej/src/hu/keve/capstonej/*.java -d build/csj/bin
-		find capstonej/capstonej -name "*.java" -print0 | xargs -0 javadoc -classpath lib/bridj-0.7.0.jar:$CSBJARNAME-bin.jar -link http://nativelibs4java.sourceforge.net/bridj/api/0.7.0 -link http://download.oracle.com/javase/6/docs/api -d build/csj/doc > javadoc-capstonej-$BRANCH.log
-		CSJJARNAME=capstonej-${API_MAJOR}.${API_MINOR}_git
+			rm -rf build/csj
+			mkdir -p build/csj/bin
+			javac -cp lib/bridj-0.7.0.jar:lib/junit.jar:$CSBJARNAME-bin.jar capstonej/capstonej/src/hu/keve/capstonej/*.java capstonej/capstonej/test/hu/keve/capstonej/*.java -d build/csj/bin
+			if [ $? -eq 0 ]; then
+				find capstonej/capstonej -name "*.java" -print0 | xargs -0 javadoc -classpath lib/bridj-0.7.0.jar:lib/junit.jar:$CSBJARNAME-bin.jar -link http://nativelibs4java.sourceforge.net/bridj/api/0.7.0 -link http://download.oracle.com/javase/7/docs/api -link http://junit.sourceforge.net/javadoc -d build/csj/doc > javadoc-capstonej-$BRANCH.log
+				CSJJARNAME=capstonej-${API_MAJOR}.${API_MINOR}_git
 
-		jar cf $CSJJARNAME-bin.jar -C build/csj/bin .
-		jar cf $CSJJARNAME-src.jar -C capstonej/capstonej/src .
-		jar cf $CSJJARNAME-javadoc.jar -C build/csj/doc .
+				jar cf $CSJJARNAME-bin.jar -C build/csj/bin .
+				jar cf $CSJJARNAME-src.jar -C capstonej/capstonej/src .
+				jar cf $CSJJARNAME-javadoc.jar -C build/csj/doc .
+			fi
+		fi
 	fi
 done
