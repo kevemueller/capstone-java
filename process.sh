@@ -14,9 +14,12 @@ git submodule update --remote capstonej
 for BRANCH in $BRANCHLIST; do
 	pushd capstone
  		git checkout $BRANCH
+		git pull
 		API_DATE=$(git show -s --format="%ci" | sed -n 's/\(....\)-\(..\)-\(..\).*/\1\2\3/p')
 	popd 
-	pushd capstonej && git checkout $BRANCH
+	pushd capstonej 
+		git checkout $BRANCH
+		git pull
 	popd 
 	API_MAJOR=$(sed -n 's/#define \+CS_API_MAJOR \+//p' $(find capstone -name capstone.h))
 	API_MINOR=$(sed -n 's/#define \+CS_API_MINOR \+//p' $(find capstone -name capstone.h))
